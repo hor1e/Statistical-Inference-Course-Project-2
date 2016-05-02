@@ -1,0 +1,81 @@
+---
+title: "Analyzing Tooth Growth Data for Guinea Pigs"
+author: "Tadashi Horie"
+---
+
+# Overview
+This is the second portion of the class, we're going to analyze the ToothGrowth data in the R datasets package.
+
+In this project, we are tasked these parts:
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there’s other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions.
+
+# Exercise
+
+#### Loading add-on package
+```{r}
+library(ggplot2)
+```
+
+
+#### **1. Load the ToothGrowth data and perform some basic exploratory data analyses**
+```{r}
+data(ToothGrowth)  # ToothGrowth dataset
+str(ToothGrowth)
+```
+
+#### **2. Provide a basic summary of the data.**
+```{r}
+summary(ToothGrowth)
+```
+
+```{r}
+ggplot(data = ToothGrowth, aes(x = supp, y = len)) +
+         geom_boxplot(aes(fill = supp))
+
+ggplot(data = ToothGrowth, aes(x = supp, y = len)) +
+         geom_boxplot(aes(fill = supp)) + facet_wrap(~ dose)
+```
+
+#### **3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose.**
+
+The T-test by dose:
+```{r}
+t.test(ToothGrowth$len[ToothGrowth$dose == 1], ToothGrowth$len[ToothGrowth$dose == 0.5],
+       paired = FALSE, alternative = "greater")$p.value
+
+t.test(ToothGrowth$len[ToothGrowth$dose == 2], ToothGrowth$len[ToothGrowth$dose == 1],
+       paired = FALSE, alternative = "greater")$p.value
+```
+Note: Increaseng doseages increase mean tooth length.
+
+
+The T-test by supp:
+```{r}
+t.test(len ~ supp, data = ToothGrowth, paired = FALSE)$p.value
+```
+Note: The p-value of OJ vs. VC is 0.06, which is greater than 0.05, so I accept the null hypothesis. but...
+
+The T-test by supp for each dose:
+```{r}
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 0.5, ], paired = FALSE)$p.value
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 1, ], paired = FALSE)$p.value
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 2, ], paired = FALSE)$p.value
+```
+Note: 
+
+In case of doseages is **0.5**, the p-value of OJ vs. VC is 0.006, which is less than 0.05, so I **DO NOT** accept the null hypothesis.
+
+In case of doseages is **1.0**, the p-value of OJ vs. VC is 0.001, which is less than 0.05, so I **DO NOT** accept the null hypothesis.
+
+In case of doseages is **2.0**, the p-value of OJ vs. VC is 0.964, which is greater than 0.05, so I accept the null hypothesis.
+
+
+#### **4. State your conclusions and the assumptions needed for your conclusions.**
+
+- Increaseng doseages increase mean tooth length.
+
+- Orange juice (OJ) increase tooth length unless doseage is 2.0.
